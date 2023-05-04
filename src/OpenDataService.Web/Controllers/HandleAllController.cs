@@ -42,16 +42,16 @@ namespace OpenDataService.Web.Controllers
             var segment = path.FirstSegment as EntitySetSegment;
             var entitysetName = segment.EntitySet.Name;
             IEdmNavigationSource source = segment?.EntitySet;
-            var collection = new EdmEntityObjectCollection(new EdmCollectionTypeReference(collectionType));
-            
 
             var model = Request.GetModel();
 
             SetSelectExpandClauseOnODataFeature(path, edmEntityType);
 
             IDataSource ds = Request.HttpContext.GetDataSource();
-            var items = ds.Get();
-            var queryContext = new ODataQueryContext(model, ds.ClrType, path);
+            var entitySet = ds.GetEntitySet(entitysetName);
+            var collection = new EdmEntityObjectCollection(new EdmCollectionTypeReference(collectionType));
+            var items = entitySet.Get();
+            var queryContext = new ODataQueryContext(model, entitySet.ClrType, path);
             var queryOptions = new ODataQueryOptions(queryContext, Request);
 
             items = queryOptions.ApplyTo(items);

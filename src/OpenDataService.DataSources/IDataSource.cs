@@ -1,12 +1,18 @@
-using System.Linq.Expressions;
-using Microsoft.AspNetCore.OData.Formatter.Value;
-using Microsoft.OData.Edm;
-
 namespace OpenDataService.DataSources;
 
-public interface IDataSource
+public interface IEntitySet
 {
+    string Name { get; }
     Type ClrType { get; }
-    IEdmModel Model { get; }
     IQueryable Get();
+}
+
+public interface IEntitySet<T> : IEntitySet
+{
+    IQueryable<T> GetClr();
+}
+
+public interface IDataSource : IEnumerable<IEntitySet>
+{
+    public IEntitySet GetEntitySet(string name);
 }

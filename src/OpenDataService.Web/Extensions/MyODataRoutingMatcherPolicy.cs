@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Routing.Matching;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using OpenDataService.DataSources;
+using OpenDataService.Web.OData;
 
 namespace OpenDataService.Web.Extensions
 {
@@ -20,6 +21,8 @@ namespace OpenDataService.Web.Extensions
     {
         private IODataTemplateTranslator _translator;
         private IDataSourceProvider _provider;
+
+        private Dictionary<IDataSource, IEdmModel> datasourceToModelMap = new Dictionary<IDataSource, IEdmModel>();
 
         public MyODataRoutingMatcherPolicy(IODataTemplateTranslator translator,
             IDataSourceProvider provider )
@@ -50,11 +53,6 @@ namespace OpenDataService.Web.Extensions
                 return Task.CompletedTask;
             }
 
-            // The goal of this method is to perform the final matching:
-            // Map between route values matched by the template and the ones we want to expose to the action for binding.
-            // (tweaking the route values is fine here)
-            // Invalidating the candidate if the key/function values are not valid/missing.
-            // Perform overload resolution for functions by looking at the candidates and their metadata.
             for (var i = 0; i < candidates.Count; i++)
             {
                 ref CandidateState candidate = ref candidates[i];
@@ -75,10 +73,13 @@ namespace OpenDataService.Web.Extensions
                     continue;
                 }
                 httpContext.SetDataSource(dataSource);
-                var model = dataSource.Model;
 
-                ODataTemplateTranslateContext translatorContext
-                    = new ODataTemplateTranslateContext(httpContext, candidate.Endpoint, candidate.Values, model);
+                if (!datasourceToModelMap.TryGetValue(dataSource, out var model))
+                {
+                    model = new DataSourceModelBuilder().Build(dataSource);
+                }
+
+                ODataTemplateTranslateContext translatorContext = new ODataTemplateTranslateContext(httpContext, candidate.Endpoint, candidate.Values, model);
 
                 ODataPath odataPath = _translator.Translate(metadata.Template, translatorContext);
                 if (odataPath != null)
