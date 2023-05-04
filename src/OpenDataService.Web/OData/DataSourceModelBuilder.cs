@@ -12,7 +12,7 @@ public class DataSourceModelBuilder
         var modelBuilder = new ODataConventionModelBuilder();
         foreach (var entityset in dataSource)
         {
-            var func = modelBuilder.GetType().GetMethod(nameof(ODataConventionModelBuilder.EntitySet)).MakeGenericMethod(entityset.ClrType);
+            var func = modelBuilder.GetType().GetMethod(nameof(ODataConventionModelBuilder.EntitySet))!.MakeGenericMethod(entityset.ClrType);
             func.Invoke(modelBuilder, new [] {entityset.Name});
         }
         return modelBuilder.GetEdmModel();
