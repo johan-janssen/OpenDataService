@@ -37,15 +37,11 @@ namespace OpenDataService.Web.Controllers
             ODataPath path = Request.ODataFeature().Path;
             IEdmCollectionType collectionType = (IEdmCollectionType)path.Last().EdmType;
             IEdmEntityTypeReference edmEntityTypeReference = collectionType.ElementType.AsEntity();
-            var edmEntityType = edmEntityTypeReference.EntityDefinition();
 
             var segment = path.FirstSegment as EntitySetSegment;
             var entitysetName = segment.EntitySet.Name;
-            IEdmNavigationSource source = segment?.EntitySet;
 
             var model = Request.GetModel();
-
-            SetSelectExpandClauseOnODataFeature(path, edmEntityType);
 
             IDataSource ds = Request.HttpContext.GetDataSource();
             var entitySet = ds.GetEntitySet(entitysetName);
@@ -65,14 +61,14 @@ namespace OpenDataService.Web.Controllers
         }
 
         // Get entityset(key) odata/{datasource}/{entityset}({key})
-        public IEdmEntityObject GetByKey(string datasource, string entityset, string key)
+        public IActionResult GetByKey(string datasource, string entityset, string key)
         {
             // Get entity type from path.
             ODataPath path = Request.ODataFeature().Path;
             IEdmEntityType entityType = (IEdmEntityType)path.Last().EdmType;
 
             //Set the SelectExpandClause on OdataFeature to include navigation property set in the $expand
-            SetSelectExpandClauseOnODataFeature(path, entityType);
+            //SetSelectExpandClauseOnODataFeature(path, entityType);
 
             // Create an untyped entity object with the entity type.
             EdmEntityObject entity = new EdmEntityObject(entityType);
@@ -80,7 +76,8 @@ namespace OpenDataService.Web.Controllers
             IDataSource ds = _provider.DataSources[datasource];
             //ds.Get(key, entity);
 
-            return entity;
+            return Ok(entity);
+            //return entity;
         }
 
         // odata/{datasource}/{entityset}({key})/{navigation}
@@ -96,7 +93,7 @@ namespace OpenDataService.Web.Controllers
 
             IEdmEntityType? entityType = property.NavigationProperty.DeclaringType as IEdmEntityType;
             //Set the SelectExpandClause on OdataFeature to include navigation property set in the $expand
-            SetSelectExpandClauseOnODataFeature(path, entityType);
+            //SetSelectExpandClauseOnODataFeature(path, entityType);
 
             EdmEntityObject entity = new EdmEntityObject(entityType);
             return NotFound();
@@ -118,40 +115,6 @@ namespace OpenDataService.Web.Controllers
             // }
 
             // return Ok(nav);
-        }
-
-        private IDictionary<string, string> ToDictionary(IQueryCollection collection)
-        {
-            IDictionary<string, string> options = new Dictionary<string, string>();
-            foreach (var k in Request.Query.Keys)
-            {
-                options.Add(k, collection[k]);
-            }
-            return options;
-        }
-
-        /// <summary>
-        /// Set the <see cref="SelectExpandClause"/> on ODataFeature.
-        /// Without this, the response does not contains navigation property included in $expand
-        /// </summary>
-        /// <param name="odataPath">OData Path from the Request</param>
-        /// <param name="edmEntityType">Entity type on which the query is being performed</param>
-        /// <returns></returns>
-        private void SetSelectExpandClauseOnODataFeature(ODataPath odataPath, IEdmType edmEntityType)
-        {
-            IDictionary<string, string> options = new Dictionary<string, string>();
-            foreach (var k in Request.Query.Keys)
-            {
-                options.Add(k, Request.Query[k]);
-            }
-
-            //At this point, we should have valid entity segment and entity type.
-            //If there is invalid entity in the query, then OData routing should return 404 error before executing this api
-            var segment = odataPath.FirstSegment as EntitySetSegment;
-            IEdmNavigationSource source = segment?.EntitySet;
-            ODataQueryOptionParser parser = new(Request.GetModel(), edmEntityType, source, options);
-            //Set the SelectExpand Clause on the ODataFeature otherwise  Odata formatter won't show the expand and select properties in the response.
-            Request.ODataFeature().SelectExpandClause = parser.ParseSelectAndExpand();
         }
     }
 }

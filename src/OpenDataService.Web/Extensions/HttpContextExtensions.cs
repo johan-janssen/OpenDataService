@@ -5,7 +5,7 @@ public static class HttpContextExtensions
 {
     public static void SetDataSource(this HttpContext context, IDataSource dataSource)
     {
-        context.Items.Add(typeof(IDataSource), dataSource);
+        context.Items.TryAdd(typeof(IDataSource), dataSource);
     }
     public static IDataSource GetDataSource(this HttpContext context)
     {
