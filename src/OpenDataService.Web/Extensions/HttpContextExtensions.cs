@@ -1,4 +1,6 @@
 using OpenDataService.DataSources;
+using OpenDataService.Web.Extensions;
+
 namespace OpenDataService.Web;
 
 public static class HttpContextExtensions
@@ -9,17 +11,11 @@ public static class HttpContextExtensions
     }
     public static IDataSource GetDataSource(this HttpContext context)
     {
-        object? dataSourceObj;
-        if (!context.Items.TryGetValue(typeof(IDataSource), out dataSourceObj))
+        if (!context.Items.TryGetValueTyped(typeof(IDataSource), out IDataSource? dataSource))
         {
             throw new ArgumentException("Datasource missing");
         }
 
-        var dataSource = dataSourceObj as IDataSource;
-        if (dataSource == null)
-        {
-            throw new ArgumentNullException("Datasource null");
-        }
-        return dataSource;
+        return dataSource!;
     }
 }

@@ -16,18 +16,16 @@ public class EntitySetWithKeyTemplateSegment : ODataSegmentTemplate
 
     public override bool TryTranslate(ODataTemplateTranslateContext context)
     {
-        if (!context.RouteValues.TryGetValue("entityset", out object? entitysetNameObj) || !(entitysetNameObj is string))
+        if (!context.RouteValues.TryGetValueTyped("entityset", out string? entitySetName))
         {
             return false;
         }
 
-        if (!context.RouteValues.TryGetValue("key", out object? keyObj) || !(keyObj is string))
+        if (!context.RouteValues.TryGetValueTyped("key", out string? keyValue))
         {
             return false;
         }
 
-        string entitySetName = (string)entitysetNameObj;
-        string keyValue = (string)keyObj;
         var edmEntitySet = context.Model.EntityContainer.EntitySets()
             .FirstOrDefault(e => string.Equals(entitySetName, e.Name, StringComparison.OrdinalIgnoreCase));
 

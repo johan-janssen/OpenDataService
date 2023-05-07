@@ -14,12 +14,10 @@ public class EntitySetTemplateSegment : ODataSegmentTemplate
 
     public override bool TryTranslate(ODataTemplateTranslateContext context)
     {
-        if (!context.RouteValues.TryGetValue("entityset", out object? classname) || !(classname is string))
+        if (!context.RouteValues.TryGetValueTyped("entityset", out string? entitySetName))
         {
             return false;
         }
-
-        string entitySetName = (string)classname;
 
         var edmEntitySet = context.Model.EntityContainer.EntitySets()
             .FirstOrDefault(e => string.Equals(entitySetName, e.Name, StringComparison.OrdinalIgnoreCase));

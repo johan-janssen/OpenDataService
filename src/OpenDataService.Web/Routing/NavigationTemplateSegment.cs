@@ -16,12 +16,11 @@ public class NavigationTemplateSegment : ODataSegmentTemplate
 
     public override bool TryTranslate(ODataTemplateTranslateContext context)
     {
-        if (!context.RouteValues.TryGetValue("navigation", out object? navigationNameObj) || !(navigationNameObj is string))
+        if (!context.RouteValues.TryGetValueTyped("navigation", out string? navigationName))
         {
             return false;
         }
 
-        string navigationName = (string)navigationNameObj;
         KeySegment keySegment = (KeySegment)context.Segments.Last();
         IEdmEntityType entityType = (IEdmEntityType)keySegment.EdmType;
 

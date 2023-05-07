@@ -14,6 +14,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using OpenDataService.DataSources;
 using OpenDataService.Web.OData;
+using OpenDataService.Web.Extensions;
 
 namespace OpenDataService.Web.Extensions
 {
@@ -119,12 +120,12 @@ namespace OpenDataService.Web.Extensions
                 return null;
             }
 
-            if (!routeValues.TryGetValue("datasource", out object? dataSourceName) || !(dataSourceName is string))
+            if (!routeValues.TryGetValueTyped("datasource", out string? dataSourceName))
             {
                 return null;
             }
 
-            _provider.DataSources.TryGetValue((string)dataSourceName, out IDataSource? dataSource);
+            _provider.DataSources.TryGetValue(dataSourceName!, out IDataSource? dataSource);
 
             return dataSource;
         }
