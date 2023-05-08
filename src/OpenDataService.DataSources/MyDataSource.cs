@@ -1,12 +1,11 @@
 
 using System.Collections;
 using System.Linq;
-using Microsoft.AspNetCore.OData.Formatter.Value;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
+using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
 using OpenDataService.DataSources;
 
-namespace OpenDataService.Web.Extensions
+namespace OpenDataService.DataSources
 {
     public class Part
     {
@@ -19,15 +18,9 @@ namespace OpenDataService.Web.Extensions
         public Part[] Parts { get; set; } = new Part[0];
     }
 
-    internal class EntitySet : IEntitySet, IEntitySet<Product>
+    public class EntitySet : IEntitySet, IEntitySet<Product>
     {
-        public EntitySet(IEdmCollectionType edmType)
-        {
-            EdmType = edmType;
-        }
         public string Name => "Products";
-
-        public IEdmCollectionType EdmType { get; set; }
 
         public Type ClrType => typeof(Product);
 
@@ -45,17 +38,13 @@ namespace OpenDataService.Web.Extensions
         }
     }
 
-    internal class MyDataSource : IDataSource
+    public class MyDataSource : IDataSource
     {
         private List<IEntitySet> entitySets = new List<IEntitySet>();
         public MyDataSource()
         {
-            var modelBuilder = new ODataConventionModelBuilder();
-            modelBuilder.EntitySet<Product>("Products");
-            Model = modelBuilder.GetEdmModel();
-            entitySets.Add(new EntitySet((IEdmCollectionType)Model.FindDeclaredEntitySet("Products").Type));
+            entitySets.Add(new EntitySet());
         }
-        public IEdmModel Model { get; }
 
         public IEntitySet GetEntitySet(string name)
         {

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.OData.Edm;
 using Microsoft.AspNetCore.OData.Formatter;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Linq.Expressions;
 
 namespace OpenDataService.Web.Controllers
 {
@@ -32,52 +33,104 @@ namespace OpenDataService.Web.Controllers
 
         // Get entityset
         // odata/{datasource}/{entityset}
-        public EdmEntityObjectCollection Get()
+        public IActionResult Get()
         {
-            ODataPath path = Request.ODataFeature().Path;
-            IEdmCollectionType collectionType = (IEdmCollectionType)path.Last().EdmType;
-            IEdmEntityTypeReference edmEntityTypeReference = collectionType.ElementType.AsEntity();
+            var items = Query(Request);
+            var collection = ClrToEdmEntities(Request, items);
+            return Ok(collection);
+        }
 
-            var segment = path.FirstSegment as EntitySetSegment;
-            var entitysetName = segment.EntitySet.Name;
+        // Get entityset(key) odata/{datasource}/{entityset}({key})
+        public IActionResult GetByKey()
+        {
+            TryGetKeyValue(Request, out var keyValue);
+            TryGetEntitysetName(Request, out var entitysetName);
+            var items = Request.HttpContext.GetDataSource().GetEntitySet(entitysetName).Get();
+            var filteredItems = items.Filter(keyValue.Value.Key, ExpressionType.Equal, keyValue.Value.Value);
+            var item = filteredItems.Cast<object>().SingleOrDefault();
 
-            var model = Request.GetModel();
+            if (item == null)
+            {
+                return NotFound();
+            }
 
-            IDataSource ds = Request.HttpContext.GetDataSource();
-            var entitySet = ds.GetEntitySet(entitysetName);
+            var entity = ClrToEdmEntity(Request, item);
+            return Ok(entity);
+        }
+
+        private EdmEntityObjectCollection ClrToEdmEntities(HttpRequest request, IQueryable items)
+        {
+            var path = request.ODataFeature().Path;
+            var collectionType = (IEdmCollectionType)path.Last().EdmType;
             var collection = new EdmEntityObjectCollection(new EdmCollectionTypeReference(collectionType));
-            var items = entitySet.Get();
-            var queryContext = new ODataQueryContext(model, entitySet.ClrType, path);
-            var queryOptions = new ODataQueryOptions(queryContext, Request);
+            var edmEntityTypeReference = collectionType.ElementType.AsEntity();
 
-            items = queryOptions.ApplyTo(items);
             var serializerContext = new Microsoft.AspNetCore.OData.Formatter.Serialization.ODataSerializerContext() { Request = Request, TimeZone = Request.GetTimeZoneInfo() };
             foreach (var r in items)
             {
                 var resourceContext = new ResourceContext(serializerContext, edmEntityTypeReference, r);
                 collection.Add(resourceContext.EdmObject as IEdmEntityObject);
             }
+
             return collection;
         }
 
-        // Get entityset(key) odata/{datasource}/{entityset}({key})
-        public IActionResult GetByKey(string datasource, string entityset, string key)
+        private IEdmEntityObject ClrToEdmEntity(HttpRequest request, object item)
         {
-            // Get entity type from path.
-            ODataPath path = Request.ODataFeature().Path;
-            IEdmEntityType entityType = (IEdmEntityType)path.Last().EdmType;
+            var path = request.ODataFeature().Path;
+            var entityType = (IEdmEntityType)path.Last().EdmType;
+            
 
-            //Set the SelectExpandClause on OdataFeature to include navigation property set in the $expand
-            //SetSelectExpandClauseOnODataFeature(path, entityType);
+            var serializerContext = new Microsoft.AspNetCore.OData.Formatter.Serialization.ODataSerializerContext() { Request = Request, TimeZone = Request.GetTimeZoneInfo() };
+            var resourceContext = new ResourceContext(serializerContext, new EdmEntityTypeReference(entityType, false), item);
 
-            // Create an untyped entity object with the entity type.
-            EdmEntityObject entity = new EdmEntityObject(entityType);
+            return (IEdmEntityObject)resourceContext.EdmObject;
+        }
 
-            IDataSource ds = _provider.DataSources[datasource];
-            //ds.Get(key, entity);
+        private IQueryable Query(HttpRequest request)
+        {
+            var model = request.GetModel();
+            var ds = request.HttpContext.GetDataSource();
+            var path = request.ODataFeature().Path;
+            
+            if (!TryGetEntitysetName(request, out var entitysetName))
+            {
 
-            return Ok(entity);
-            //return entity;
+            }
+            
+            var entitySet = ds.GetEntitySet(entitysetName);
+            var items = entitySet.Get();
+            var queryContext = new ODataQueryContext(model, entitySet.ClrType, path);
+            var queryOptions = new ODataQueryOptions(queryContext, request);
+
+            return queryOptions.ApplyTo(items);
+        }
+
+        private bool TryGetEntitysetName(HttpRequest request, out string entitysetName)
+        {
+            var path = request.ODataFeature().Path;
+            var segment = path.FirstSegment as EntitySetSegment;
+            if (segment == null)
+            {
+                entitysetName = string.Empty;
+                return false;
+            }
+            entitysetName = segment.EntitySet.Name;
+            return true;
+        }
+
+        private bool TryGetKeyValue(HttpRequest request, out KeyValuePair<string, object>? keyValue)
+        {
+            var path = request.ODataFeature().Path;
+            var segment = path.SingleOrDefault(segment => segment is KeySegment);
+
+            if (segment == null)
+            {
+                keyValue = null;
+                return false;
+            }
+            keyValue = ((KeySegment)segment).Keys.First();
+            return true;
         }
 
         // odata/{datasource}/{entityset}({key})/{navigation}
