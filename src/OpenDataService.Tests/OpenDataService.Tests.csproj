@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>odata_web.tests</RootNamespace>
+    <RootNamespace>OpenDataService.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -16,6 +16,16 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
     <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenDataService.DataSources\OpenDataService.DataSources.csproj" />
+    <ProjectReference Include="..\OpenDataService.DataSources.Excel\OpenDataService.DataSources.Excel.csproj" />
+    <ProjectReference Include="..\OpenDataService.DataSources.Csv\OpenDataService.DataSources.Csv.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="data\excelfile.xlsx" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace odata_web.tests;
+namespace OpenDataService.Tests;
 
 public class Tests
 {
