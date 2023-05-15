@@ -9,8 +9,6 @@ using Microsoft.OData.UriParser;
 using OpenDataService.Web.Extensions;
 using OpenDataService.DataSources;
 using Microsoft.AspNetCore.OData.Query;
-using System.Reflection.Emit;
-using System.Reflection;
 using Microsoft.AspNetCore.OData.Edm;
 using Microsoft.AspNetCore.OData.Formatter;
 using System.Text;
@@ -24,10 +22,6 @@ namespace OpenDataService.Web.Controllers
         private IDataSourceProvider _provider;
         public HandleAllController(IDataSourceProvider provider)
         {
-            var ab = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("x"), AssemblyBuilderAccess.Run);
-            var mb = ab.DefineDynamicModule(ab.GetName().ToString());
-            var tb = mb.DefineType("sometype", TypeAttributes.Public);
-            var type = tb.CreateType();
             _provider = provider;
         }
 
