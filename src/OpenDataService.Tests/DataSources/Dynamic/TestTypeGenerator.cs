@@ -31,7 +31,7 @@ public class TestTypeGenerator
     }
     
     [Test]
-    public void GenerateTypeTwiceDoesNotWork()
+    public void GenerateTypeTwice_SurprisesMeThatThisWorks()
     {
         var generator = new TypeGenerator();
         var firstTime = generator.Generate(
