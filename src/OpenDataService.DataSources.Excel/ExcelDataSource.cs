@@ -1,44 +1,42 @@
-﻿using System.IO;
-using OpenDataService.DataSources;
-using DocumentFormat.OpenXml;
+﻿using OpenDataService.DataSources;
+using OpenDataService.DataSources.Dynamic;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Collections;
 
 namespace OpenDataService.DataSources.Excel;
 
-public class ColumnDefinition
+public class ExcelDataSource : IDataSource
 {
-    public ColumnDefinition(int index, string name, Type type)
-    {
-        Index = index;
-        Name = name;
-        Type = type;
-    }
-
-    public int Index { get; }
-    public string Name { get; }
-    public Type Type { get; }
-}
-
-public class Sheet
-{
-    public Sheet(string name, IEnumerable<ColumnDefinition> columns)
-    {
-        Name = name;
-        Columns = columns;
-    }
-
-    public string Name { get; }
-    public IEnumerable<ColumnDefinition> Columns { get; }
-}
-
-public class ExcelDataSource
-{
+    private Dictionary<string, IEntitySet> entitySets = new Dictionary<string, IEntitySet>();
     public ExcelDataSource(Stream stream)
     {
+
         Sheets = Read(stream);
+
+        var entitySetBuilder = new EntitySetBuilder("Excel");
+        var builtEntitySets = entitySetBuilder.Build("DS", Sheets);
+        foreach (var entitySet in builtEntitySets)
+        {
+            entitySets.Add(entitySet.Name, entitySet);
+        }
     }
     public IEnumerable<Sheet> Sheets { get; private set;}
+
+    public IEntitySet GetEntitySet(string name)
+    {
+        return entitySets[name];
+    }
+
+    public IEnumerator<IEntitySet> GetEnumerator()
+    {
+        return entitySets.Values.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return entitySets.Values.GetEnumerator();
+    }
     private IEnumerable<Sheet> Read(Stream stream)
     {
         var sheets = new List<Sheet>();
@@ -60,7 +58,7 @@ public class ExcelDataSource
                 Row columnRow = sheetData.Elements<Row>().First();
                 IEnumerable<Row> dataRows = sheetData.Elements<Row>().Skip(1);
                 var dataRaw = dataRows.Select(row => row.Elements<Cell>().Select(cell => GetCellValue(cell, workbook)).ToArray()).ToArray();
-                sheets.Add(new Sheet(name, GetColumns(columnRow, workbook, dataRaw)));
+                sheets.Add(new Sheet(name, GetColumns(columnRow, workbook, dataRaw), dataRaw));
                 var worksheet = sheetPart.Worksheet;
                 Console.WriteLine(sheetData.ToString());
             }
@@ -83,7 +81,7 @@ public class ExcelDataSource
         
         return columns;
     }
-    private class Foor
+    private class TypeCounter
     {
         public Type Type = typeof(object);
         public int Count;
@@ -92,10 +90,10 @@ public class ExcelDataSource
     {
         var typesOrderedByComplexity = new []
         {
-            new Foor { Type = typeof(string), Count = 0 },
-            new Foor { Type = typeof(bool), Count = 0 },
-            new Foor { Type = typeof(float), Count = 0 },
-            new Foor { Type = typeof(int), Count = 0 },
+            new TypeCounter { Type = typeof(string), Count = 0 },
+            new TypeCounter { Type = typeof(bool), Count = 0 },
+            new TypeCounter { Type = typeof(float), Count = 0 },
+            new TypeCounter { Type = typeof(int), Count = 0 },
         };
         var unmatchedTypeCount = 0;
 

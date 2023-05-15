@@ -1,3 +1,4 @@
+using System.Linq.Dynamic.Core;
 using System.Reflection;
 using OpenDataService.DataSources.Excel;
 namespace OpenDataService.Tests.DataSources.Excel;
@@ -41,5 +42,29 @@ public class TestExcelDataSource
         ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
         Assert.That(dataSource.Sheets.ElementAt(0).Columns.Select(c => c.Type).ToArray(), Is.EqualTo(new [] { typeof(int), typeof(string) }));
         Assert.That(dataSource.Sheets.ElementAt(1).Columns.Select(c => c.Type).ToArray(), Is.EqualTo(new [] { typeof(string), typeof(string), typeof(int), typeof(float), typeof(float) }));
+    }
+
+    [Test]
+    public void HasEntitySets()
+    {
+        ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
+        Assert.That(dataSource.GetEntitySet("Tab1").Name, Is.EqualTo("Tab1"));
+        Assert.That(dataSource.GetEntitySet("Set2").Name, Is.EqualTo("Set2"));
+    }
+
+    [Test]
+    public void HasEntitySetTypes()
+    {
+        ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
+        Assert.That(dataSource.GetEntitySet("Tab1").ClrType.Name, Is.EqualTo("Tab1"));
+        Assert.That(dataSource.GetEntitySet("Set2").ClrType.Name, Is.EqualTo("Set2"));
+    }
+
+    [Test]
+    public void HasEntitySetData()
+    {
+        ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
+        Assert.That(dataSource.GetEntitySet("Tab1").Get().Count(), Is.EqualTo(4));
+        Assert.That(dataSource.GetEntitySet("Set2").Get().Count(), Is.EqualTo(3));
     }
 }
