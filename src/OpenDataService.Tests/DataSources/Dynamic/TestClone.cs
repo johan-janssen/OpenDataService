@@ -13,7 +13,7 @@ public class TestClone
 
     }
 
-    class ClonedProduct { public int Id; public string Name; public Part[] Parts; }
+    class ClonedProduct { public int Id=-1; public string Name=string.Empty; public Part[] Parts=new Part[0]; }
 
     [Test]
     public void Clone()
@@ -26,6 +26,12 @@ public class TestClone
             var a = item;
             var b = cloned[i];
             Assert.That(a.Id, Is.EqualTo(b.Id));
+            Assert.That(a.Name, Is.EqualTo(b.Name));
+            Assert.That(a.Parts.Length, Is.EqualTo(b.Parts.Length));
+            foreach (var (partA, idx) in a.Parts.WithIndex())
+            {
+                Assert.That(partA.Name, Is.EqualTo(b.Parts[idx].Name));
+            }
         }
     }
 }
