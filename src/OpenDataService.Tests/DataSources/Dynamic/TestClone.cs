@@ -19,7 +19,7 @@ public class TestClone
     public void Clone()
     {
         var entitySet = new EntitySet();
-        var cloned = entitySet.Clone<ClonedProduct>().ToArray();
+        var cloned = entitySet.Clone<ClonedProduct>().ToList();
         
         foreach (var (item, i) in entitySet.GetClr().WithIndex())
         {
@@ -33,6 +33,22 @@ public class TestClone
                 Assert.That(partA.Name, Is.EqualTo(b.Parts[idx].Name));
             }
         }
+    }
+
+    class BadClonedProductMissingField { /*public int Id=-1;*/ public string Name=string.Empty; public Part[] Parts=new Part[0]; }
+    [Test]
+    public void CannotCloneBecauseOfMissingField()
+    {
+        var entitySet = new EntitySet();
+        Assert.Throws(typeof(Exception), () => entitySet.Clone<BadClonedProductMissingField>().ToArray());
+    }
+
+    class BadClonedProductMistmatch { public string Id=string.Empty; public string Name=string.Empty; public Part[] Parts=new Part[0]; }
+    [Test]
+    public void CannotCloneBecauseOfMismatchingTypes()
+    {
+        var entitySet = new EntitySet();
+        Assert.Throws(typeof(Exception), () => entitySet.Clone<BadClonedProductMistmatch>().ToArray());
     }
 }
 
