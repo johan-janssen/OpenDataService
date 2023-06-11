@@ -18,8 +18,7 @@ public class TypeGenerator
 
             foreach (var propertyDefinition in typeDefinition.Properties)
             {
-                // we generate a field instead of a property because it's easier. Properties need getter and setter methods, which result in a load of code.
-                var fieldBuilder = typeBuilder.DefineField(propertyDefinition.Name, propertyDefinition.Type, FieldAttributes.Public);
+                DefineProperty(propertyDefinition, typeBuilder);
             }
 
             var type = typeBuilder.CreateType();
@@ -27,5 +26,29 @@ public class TypeGenerator
         }
 
         return typemap;
+    }
+
+    private void DefineProperty(PropertyDefinition propertyDefinition, TypeBuilder typeBuilder)
+    {
+        var fieldBuilder = typeBuilder.DefineField("_" + propertyDefinition.Name, propertyDefinition.Type, FieldAttributes.Private);
+        var propertyBuilder = typeBuilder.DefineProperty(propertyDefinition.Name, PropertyAttributes.None, propertyDefinition.Type, null);
+
+        var getterSetterAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
+
+        var getterBuilder = typeBuilder.DefineMethod("get_" + propertyDefinition.Name, getterSetterAttributes, propertyDefinition.Type, Type.EmptyTypes);
+        var getterIL = getterBuilder.GetILGenerator();
+        getterIL.Emit(OpCodes.Ldarg_0);
+        getterIL.Emit(OpCodes.Ldfld, fieldBuilder);
+        getterIL.Emit(OpCodes.Ret);
+
+        var setterBuilder = typeBuilder.DefineMethod("set_" + propertyDefinition.Name, getterSetterAttributes, null, new [] { propertyDefinition.Type });
+        ILGenerator setterIL = setterBuilder.GetILGenerator();
+        setterIL.Emit(OpCodes.Ldarg_0);
+        setterIL.Emit(OpCodes.Ldarg_1);
+        setterIL.Emit(OpCodes.Stfld, fieldBuilder);
+        setterIL.Emit(OpCodes.Ret);
+
+        propertyBuilder.SetGetMethod(getterBuilder);
+        propertyBuilder.SetSetMethod(setterBuilder);
     }
 }

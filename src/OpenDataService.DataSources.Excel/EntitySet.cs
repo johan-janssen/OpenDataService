@@ -47,7 +47,7 @@ public class EntitySetBuilder
             var row = Activator.CreateInstance(t)!;
             foreach (var column in sheet.Columns)
             {
-                t.GetField(column.Name)?.SetValue(row, data[i][column.Index]);
+                t.GetProperty(column.Name)?.SetValue(row, data[i][column.Index]);
             }
             rows.Add(row);
         }

@@ -27,7 +27,7 @@ public class TestTypeGenerator
         var type = types.Values.First();
         Assert.That(type.Namespace, Is.EqualTo("Hello.World"));
         Assert.That(type.Name, Is.EqualTo("Foo"));
-        Assert.That(type.GetField("Baz")?.FieldType, Is.EqualTo(typeof(int)));
+        Assert.That(type.GetProperty("Baz")?.PropertyType, Is.EqualTo(typeof(int)));
     }
     
     [Test]
@@ -53,13 +53,13 @@ public class TestTypeGenerator
         var firstType = firstTime.Values.First();
         var secondType = secondTime.Values.First();
 
-        Assert.That(firstType.GetFields().Length, Is.EqualTo(1));
-        Assert.That(secondType.GetFields().Length, Is.EqualTo(1));
+        Assert.That(firstType.GetProperties().Length, Is.EqualTo(1));
+        Assert.That(secondType.GetProperties().Length, Is.EqualTo(1));
         Assert.That(firstType.AssemblyQualifiedName, Is.EqualTo(secondType.AssemblyQualifiedName));
         var firstInstance = Activator.CreateInstance(firstType);
         var secondInstance = Activator.CreateInstance(secondType);
-        firstType?.GetField("Baz")?.SetValue(firstInstance, 1);
-        secondType?.GetField("Baz2")?.SetValue(secondInstance, 1);
+        firstType?.GetProperty("Baz")?.SetValue(firstInstance, 1);
+        secondType?.GetProperty("Baz2")?.SetValue(secondInstance, 1);
 
         Assert.That(firstType?.GetField("Baz")?.GetValue(firstInstance), Is.EqualTo(secondType?.GetField("Baz2")?.GetValue(secondInstance)));
     }
