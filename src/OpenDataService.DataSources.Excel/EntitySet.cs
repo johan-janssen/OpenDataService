@@ -5,18 +5,18 @@ namespace OpenDataService.DataSources.Excel;
 
 public class EntitySet : IEntitySet
 {
-    private object[] objects;
+    private IQueryable queryable;
     public EntitySet(string name, Type type, object[] data)
     {
-        objects = data;
         ClrType = type;
         Name = name;
+        queryable = OpenDataService.DataSources.Dynamic.QueryableBuilder.Build(type, data);
     }
     public string Name { get; }
     public Type ClrType { get; }
     public IQueryable Get()
     {
-        return objects.AsQueryable();
+        return queryable;
     }
 }
 

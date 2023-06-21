@@ -60,7 +60,6 @@ public class ExcelDataSource : IDataSource
                 var dataRaw = dataRows.Select(row => row.Elements<Cell>().Select(cell => GetCellValue(cell, workbook)).ToArray()).ToArray();
                 sheets.Add(new Sheet(name, GetColumns(columnRow, workbook, dataRaw), dataRaw));
                 var worksheet = sheetPart.Worksheet;
-                Console.WriteLine(sheetData.ToString());
             }
         }
 
