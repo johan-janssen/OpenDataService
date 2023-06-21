@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Http;
 using OpenDataService.DataSources;
-using OpenDataService.Web.Extensions;
 
-namespace OpenDataService.Web;
+namespace OpenDataService.Api;
 
 public static class HttpContextExtensions
 {

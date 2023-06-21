@@ -3,7 +3,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using OpenDataService.DataSources;
 
-namespace OpenDataService.Web.OData;
+namespace OpenDataService.Api.OData;
 
 public class DataSourceModelBuilder
 {

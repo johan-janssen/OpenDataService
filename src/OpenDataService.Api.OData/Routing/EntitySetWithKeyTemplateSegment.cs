@@ -5,7 +5,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace OpenDataService.Web.Routing;
+namespace OpenDataService.Api.OData.Routing;
 
 public class EntitySetWithKeyTemplateSegment : ODataSegmentTemplate
 {

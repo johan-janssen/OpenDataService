@@ -8,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using OpenDataService.Web.Extensions;
-using OpenDataService.Web.Routing;
+using OpenDataService.Api.OData.Routing;
 using OpenDataService.DataSources;
+using OpenDataService.Web.Controllers;
+using Microsoft.Extensions.Options;
 
 namespace OpenDataService.Web
 {
@@ -26,11 +28,12 @@ namespace OpenDataService.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers().AddOData(opt => opt.Count().Filter().EnableQueryFeatures());
-
             services.TryAddSingleton<IDataSourceProvider, DataSourceProvider>();
-
-            services.TryAddEnumerable(
-                ServiceDescriptor.Transient<IApplicationModelProvider, ODataRoutingModelInitializer>());
+            services.TryAddEnumerable(ServiceDescriptor.Transient<IApplicationModelProvider, ODataRoutingModelInitializer<HandleAllController>>((IServiceProvider provider) => 
+                {
+                    var options = provider.GetRequiredService<IOptions<ODataOptions>>();
+                    return new ODataRoutingModelInitializer<HandleAllController>(options, "odata");
+                }));
 
             services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, MyODataRoutingMatcherPolicy>());
         }

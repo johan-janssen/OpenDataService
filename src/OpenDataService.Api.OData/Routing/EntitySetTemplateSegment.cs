@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.OData.Routing.Template;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
-namespace OpenDataService.Web.Routing;
+namespace OpenDataService.Api.OData.Routing;
 
 public class EntitySetTemplateSegment : ODataSegmentTemplate
 {

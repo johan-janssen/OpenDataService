@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace OpenDataService.Web;
+namespace OpenDataService.Api;
 
 public static class IDictionaryExtensions
 {

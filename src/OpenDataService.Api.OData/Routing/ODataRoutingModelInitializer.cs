@@ -5,15 +5,16 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.OData.Routing.Template;
 using Microsoft.Extensions.Options;
 using Microsoft.OData.Edm;
-using OpenDataService.Web.Controllers;
 
-namespace OpenDataService.Web.Routing;
+namespace OpenDataService.Api.OData.Routing;
 
-public class ODataRoutingModelInitializer : IApplicationModelProvider
+public class ODataRoutingModelInitializer<T> : IApplicationModelProvider
 {
-    public ODataRoutingModelInitializer(IOptions<ODataOptions> options)
+    private string routePrefix;
+    public ODataRoutingModelInitializer(IOptions<ODataOptions> options, string routePrefix)
     {
-        options.Value.AddRouteComponents("odata/{datasource}", EdmCoreModel.Instance);
+        this.routePrefix = routePrefix;
+        options.Value.AddRouteComponents(routePrefix + "/{datasource}", EdmCoreModel.Instance);
     }
 
     /// <summary>
@@ -24,9 +25,9 @@ public class ODataRoutingModelInitializer : IApplicationModelProvider
     public void OnProvidersExecuted(ApplicationModelProviderContext context)
     {
         EdmModel model = new EdmModel();
-        const string prefix = "odata/{datasource}";
+        var prefix = routePrefix + "/{datasource}";
 
-        ProcessHandleAll(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(HandleAllController)));
+        ProcessHandleAll(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(T)));
         ProcessMetadata(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(MetadataController)));
     }
 
@@ -47,19 +48,6 @@ public class ODataRoutingModelInitializer : IApplicationModelProvider
         
         controllerModel.Actions.Single(action => action.ActionName == "GetByKey")
             .AddSelector("get", prefix, model, new ODataPathTemplate(new EntitySetTemplateSegment(), new EntitySetWithKeyTemplateSegment()));
-        
-        // foreach (var actionModel in controllerModel.Actions)
-        // {
-        //     if (actionModel.ActionName == "GetName")
-        //     {
-        //         ODataPathTemplate path = new ODataPathTemplate(
-        //             new EntitySetTemplateSegment(),
-        //             new EntitySetWithKeyTemplateSegment(),
-        //             new StaticNameSegment());
-
-        //         actionModel.AddSelector("get", prefix, model, path);
-        //     }
-        // }
     }
 
     private void ProcessMetadata(string prefix, IEdmModel model, ControllerModel controllerModel)
