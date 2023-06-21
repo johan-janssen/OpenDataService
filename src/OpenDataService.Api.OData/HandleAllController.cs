@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Formatter.Value;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using OpenDataService.Web.Extensions;
 using OpenDataService.DataSources;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Edm;
@@ -15,8 +15,9 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Linq.Expressions;
 using OpenDataService.Api;
+using OpenDataService.DataSources.Extensions;
 
-namespace OpenDataService.Web.Controllers
+namespace OpenDataService.Api.OData
 {
     public class HandleAllController : ODataController
     {

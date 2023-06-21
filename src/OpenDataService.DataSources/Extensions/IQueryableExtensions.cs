@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using System.Linq;
 using System.Reflection;
 
-namespace OpenDataService.Web.Extensions;
+namespace OpenDataService.DataSources.Extensions;
 
 public static class IQueryableExtensions
 {
