@@ -19,10 +19,10 @@ using OpenDataService.DataSources.Extensions;
 
 namespace OpenDataService.Api.OData
 {
-    public class HandleAllController : ODataController
+    public class CatchAllDataSourceController : ODataController
     {
         private IDataSourceProvider _provider;
-        public HandleAllController(IDataSourceProvider provider)
+        public CatchAllDataSourceController(IDataSourceProvider provider)
         {
             _provider = provider;
         }
@@ -41,6 +41,12 @@ namespace OpenDataService.Api.OData
         {
             TryGetKeyValue(Request, out var keyValue);
             TryGetEntitysetName(Request, out var entitysetName);
+
+            if (keyValue == null)
+            {
+                return NotFound();
+            }
+
             var items = Request.HttpContext.GetDataSource().GetEntitySet(entitysetName).Get();
             var filteredItems = items.Filter(keyValue.Value.Key, ExpressionType.Equal, keyValue.Value.Value);
             var item = filteredItems.Cast<object>().SingleOrDefault();

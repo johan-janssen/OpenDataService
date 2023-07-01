@@ -8,10 +8,10 @@ using Microsoft.OData.Edm;
 
 namespace OpenDataService.Api.OData.Routing;
 
-public class ODataRoutingModelInitializer<T> : IApplicationModelProvider
+public class CatchAllDataSourceRoutingProvider : IApplicationModelProvider
 {
     private string routePrefix;
-    public ODataRoutingModelInitializer(IOptions<ODataOptions> options, string routePrefix)
+    public CatchAllDataSourceRoutingProvider(IOptions<ODataOptions> options, string routePrefix)
     {
         this.routePrefix = routePrefix;
         options.Value.AddRouteComponents(routePrefix + "/{datasource}", EdmCoreModel.Instance);
@@ -27,7 +27,7 @@ public class ODataRoutingModelInitializer<T> : IApplicationModelProvider
         EdmModel model = new EdmModel();
         var prefix = routePrefix + "/{datasource}";
 
-        ProcessHandleAll(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(T)));
+        ProcessHandleAll(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(CatchAllDataSourceController)));
         ProcessMetadata(prefix, model, context.Result.Controllers.Single(controller => controller.ControllerType == typeof(MetadataController)));
     }
 
