@@ -1,0 +1,14 @@
+﻿namespace OpenDataService.DataSources.Glob.AST
+{
+    internal sealed class StringWildcard : SubSegment
+    {
+        public static readonly StringWildcard Default = new StringWildcard();
+
+        private StringWildcard()
+            : base(GlobNodeType.StringWildcard)
+        {
+        }
+
+        public override string ToString() => "*";
+    }
+}
