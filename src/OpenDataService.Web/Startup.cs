@@ -3,6 +3,7 @@ using OpenDataService.Web.Extensions;
 using OpenDataService.DataSources;
 using OpenDataService.Api.OData;
 
+
 namespace OpenDataService.Web
 {
     public class Startup
@@ -18,7 +19,7 @@ namespace OpenDataService.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.TryAddSingleton<IDataSourceProvider, DataSourceProvider>();
+            services.TryAddSingleton<IDataSourceProvider>(DataSourceProvider.Create());
             odataAspNetCoreConfigurer = new AspNetCoreServiceConfigurer();
             odataAspNetCoreConfigurer.AddCatchAllDataSourceServices("odata", services);
         }

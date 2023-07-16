@@ -1,11 +1,20 @@
 using System.Collections.Generic;
 using OpenDataService.DataSources;
 using OpenDataService.DataSources.Excel;
+using OpenDataService.DataSources.IO;
 
 namespace OpenDataService.Web.Extensions
 {
     public class DataSourceProvider : IDataSourceProvider
     {
+        public static IDataSourceProvider Create()
+        {
+            return new DirectoryDataSourceProvider(
+            new LocalFilesystemDirectoryWatcher("TestData/"), 
+            new [] { 
+                new DataSourceFactory("*.xlsx", (Stream stream) => new ExcelDataSource(stream))
+                });
+        }
         public DataSourceProvider()
         {
             DataSources = new Dictionary<string, IDataSource>
