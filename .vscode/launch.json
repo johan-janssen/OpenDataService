@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/OpenDataService.Web/bin/Debug/net7.0/OpenDataService.Web.dll",
+            "program": "${workspaceFolder}/src/OpenDataService.Web/bin/Debug/net7.0/OpenDataService.Web.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/OpenDataService.Web",
+            "cwd": "${workspaceFolder}/src/OpenDataService.Web",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {
@@ -23,7 +23,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
+                "/Views": "${workspaceFolder}/src/Views"
             }
         },
         {
@@ -40,9 +40,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/OpenDataService.Tests/bin/Debug/net7.0/OpenDataService.Tests.dll",
+            "program": "${workspaceFolder}/src/OpenDataService.Tests/bin/Debug/net7.0/OpenDataService.Tests.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/OpenDataService.Tests",
+            "cwd": "${workspaceFolder}/src/OpenDataService.Tests",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false

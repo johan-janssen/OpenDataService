@@ -1,6 +1,0 @@
-{
-    "nunitTestRunner.projectsPatterns": [
-        "**/bin/**/*.tests.dll"
-    ],
-    "dotnet.defaultSolution": "odata.sln"
-}
