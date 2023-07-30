@@ -14,7 +14,7 @@ public class LocalFilesystemDirectoryWatcher : IDirectoryWatcher
 
     public LocalFilesystemDirectoryWatcher(string directory)
     {
-        directory = Path.GetFullPath(directory);
+        directory = Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, directory));
         Directory = new Uri(directory);
         fileSystemWatcher = new FileSystemWatcher(directory)
         {
