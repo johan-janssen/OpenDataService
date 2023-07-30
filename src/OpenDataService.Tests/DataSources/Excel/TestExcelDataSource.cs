@@ -76,4 +76,28 @@ public class TestExcelDataSource
         Assert.That(tab1Data[2].Id, Is.EqualTo(3));
         Assert.That(tab1Data[3].Id, Is.EqualTo(4));
     }
+
+    class MissingIdRecord { public int Id {get;set;} public int a {get;set;} = -1; }
+    [Test]
+    public void InsertsIdsWhenNoIdColumn()
+    {
+        ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
+        var missingIdTab = dataSource.GetEntitySet("missingId");
+        var data = missingIdTab.Clone<MissingIdRecord>().ToList();
+        Assert.That(data[0].Id, Is.EqualTo(0));
+        Assert.That(data[1].Id, Is.EqualTo(1));
+    }
+
+    class NullableRecord { public int Id {get;set;} public int? a {get;set;} = -1; public int? b {get;set;} = -1; }
+    [Test]
+    public void NullFieldsAreCopied()
+    {
+        ExcelDataSource dataSource = new ExcelDataSource(new MemoryStream(excelFile));
+        var missingIdTab = dataSource.GetEntitySet("nulls");
+        var data = missingIdTab.Clone<NullableRecord>().ToList();
+
+        Assert.That(data.Count, Is.EqualTo(4));
+        Assert.That(data[1].b, Is.Null);
+        Assert.That(data[3].a, Is.Null);
+    }
 }

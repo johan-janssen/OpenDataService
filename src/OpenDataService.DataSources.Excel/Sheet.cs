@@ -4,15 +4,17 @@ namespace OpenDataService.DataSources.Excel;
 
 public class Sheet
 {
-    public Sheet(string name, IEnumerable<ColumnDefinition> columns, object[][] data)
+    ColumnDefinition[] columns;
+    public Sheet(string name, IEnumerable<ColumnDefinition> columns, object[] data)
     {
         Name = name;
-        Columns = columns;
+        this.columns = columns.ToArray();
         Data = data;
     }
 
     public string Name { get; }
-    public IEnumerable<ColumnDefinition> Columns { get; }
+    public int RowCount { get { return Data.Length / columns.Length; }}
+    public IEnumerable<ColumnDefinition> Columns { get { return columns; } }
 
-    public object[][] Data { get; }
+    public object[] Data { get; }
 }

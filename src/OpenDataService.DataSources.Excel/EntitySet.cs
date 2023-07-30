@@ -29,25 +29,36 @@ public class EntitySetBuilder
     }
     public IEnumerable<EntitySet> Build(string datasetName, IEnumerable<Sheet> sheets)
     {
+        var sheetsAndColumns = sheets.Select(sheet => new {Sheet = sheet, SheetColumns = InsertIdColumnIfMissing(sheet.Columns)});
+
         var assemblyDefinition = new AssemblyDefinition(string.Format("{0}.{1}", assemblyPrefix, datasetName),
-            sheets.Select(sheet => CreateTypeDefinition(sheet.Name, sheet.Columns))
+            sheetsAndColumns.Select(sheet => CreateTypeDefinition(sheet.Sheet.Name, sheet.SheetColumns))
         );
         var types = new TypeGenerator().Generate(assemblyDefinition);
-        var sheetsAndTheirGeneratedTypes = sheets.Select(sheet => new {Sheet=sheet, Type=types.Values.Single(t => t.Name==sheet.Name)});
+        var sheetsAndTheirGeneratedTypes = sheetsAndColumns.Select(sheet => new {Sheet=sheet.Sheet, SheetColumns=sheet.SheetColumns, Type=types.Values.Single(t => t.Name==sheet.Sheet.Name)});
 
-        return sheetsAndTheirGeneratedTypes.Select(s => Build(s.Sheet, s.Type)).ToArray();
+        return sheetsAndTheirGeneratedTypes.Select(s => Build(s.Sheet, s.SheetColumns, s.Type)).ToArray();
     }
 
-    private EntitySet Build(Sheet sheet, Type t)
+    private ColumnDefinition[] InsertIdColumnIfMissing(IEnumerable<ColumnDefinition> columns)
+    {
+        if (!columns.Any(col => col.Name == "Id"))
+        {
+            int autoIncrement = 0;
+            columns = columns.Append(new ColumnDefinition(-1, "Id", typeof(int), new object[0], 0, (int rowIndex) => autoIncrement++));
+        }
+        return columns.ToArray();
+    }
+
+    private EntitySet Build(Sheet sheet, IEnumerable<ColumnDefinition> columns, Type t)
     {
         var rows = new List<object>();
-        var data = sheet.Data;
-        for (int i=0; i<data.Length; i++)
+        for (int i=0; i<sheet.RowCount; i++)
         {
             var row = Activator.CreateInstance(t)!;
-            foreach (var column in sheet.Columns)
+            foreach (var column in columns)
             {
-                t.GetProperty(column.Name)?.SetValue(row, data[i][column.Index]);
+                t.GetProperty(column.Name)?.SetValue(row, column.GetValue(i));
             }
             rows.Add(row);
         }
